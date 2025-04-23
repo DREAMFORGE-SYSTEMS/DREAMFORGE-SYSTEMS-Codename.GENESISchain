@@ -119,7 +119,7 @@ class GenesisChainTest(unittest.TestCase):
         )
         self.assertIsNotNone(original_data)
         
-        replications = [d for d in data_inputs if d["parent_data_id"] == original_data["data_id"]]
+        replications = [d for d in data_inputs if d.get("parent_data_id") == original_data["data_id"]]
         self.assertGreater(len(replications), 0)
         print("✓ Data inputs retrieval working")
         print("✓ Self-replicated data verified")
