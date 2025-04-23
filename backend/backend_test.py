@@ -4,7 +4,7 @@ import json
 import time
 import os
 
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL')
+BACKEND_URL = "https://f645c1b7-3502-4044-aa09-a8aca94d492b.preview.emergentagent.com"
 
 class GenesisChainTest(unittest.TestCase):
     def setUp(self):
