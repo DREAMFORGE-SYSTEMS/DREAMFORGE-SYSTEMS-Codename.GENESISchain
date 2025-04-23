@@ -533,6 +533,7 @@ async def process_data_input(data: Dict[str, Any] = Body(...)):
         "timestamp": time.time(),
         "processed": True,
         "data_id": str(uuid.uuid4()),
+        "source": "user_input",
         "generated_content": {
             "images": images,
             "audio": audio_tracks
@@ -543,6 +544,9 @@ async def process_data_input(data: Dict[str, Any] = Body(...)):
     
     # Self-replication: Use the generated content as new input data
     # This simulates how the system can feed its own outputs back as inputs
+    replications = []
+    
+    # 1. Content-based replications (from generated images)
     for img in images:
         replication_data = {
             "source_type": "image",
@@ -561,10 +565,72 @@ async def process_data_input(data: Dict[str, Any] = Body(...)):
             "timestamp": time.time(),
             "processed": False,
             "data_id": str(uuid.uuid4()),
-            "parent_data_id": data_record["data_id"]
+            "parent_data_id": data_record["data_id"],
+            "source": "content_replication"
         }
         
         await db.data_inputs.insert_one(repl_record)
+        replications.append(repl_record)
+    
+    # 2. Operational data replication (from system activity)
+    # Get operational hash from mining oracle (if available)
+    operational_hash = mining_oracle.get_operational_hash()
+    if operational_hash:
+        # Generate AI content based on the operational hash
+        op_images = [await generate_image(operational_hash + str(i)) for i in range(2)]
+        op_audio = [await generate_audio(operational_hash + str(i)) for i in range(1)]
+        
+        op_record = {
+            "original_data": {
+                "source_type": "operational_data",
+                "content": "System operational data from mining and quantum operations",
+                "timestamp": time.time()
+            },
+            "hash": operational_hash,
+            "timestamp": time.time(),
+            "processed": True,
+            "data_id": str(uuid.uuid4()),
+            "parent_data_id": data_record["data_id"],
+            "source": "operational_replication",
+            "generated_content": {
+                "images": op_images,
+                "audio": op_audio
+            }
+        }
+        
+        await db.data_inputs.insert_one(op_record)
+        replications.append(op_record)
+    
+    # Collect system logs as another source of operational data
+    system_data = {
+        "timestamp": time.time(),
+        "memory_usage": os.popen('free -m').readlines(),
+        "disk_usage": os.popen('df -h').readlines(),
+        "system_load": os.getloadavg(),
+        "process_id": os.getpid()
+    }
+    
+    # Hash system operational data
+    sys_data_string = json.dumps(system_data, sort_keys=True)
+    sys_hash = hashlib.sha256(sys_data_string.encode()).hexdigest()
+    
+    # Create system operational data record
+    sys_record = {
+        "original_data": {
+            "source_type": "system_metrics",
+            "content": "System performance metrics and logs",
+            "timestamp": time.time()
+        },
+        "hash": sys_hash,
+        "timestamp": time.time(),
+        "processed": False,
+        "data_id": str(uuid.uuid4()),
+        "parent_data_id": data_record["data_id"],
+        "source": "system_replication"
+    }
+    
+    await db.data_inputs.insert_one(sys_record)
+    replications.append(sys_record)
     
     return {
         "message": "Data processed successfully",
@@ -574,7 +640,7 @@ async def process_data_input(data: Dict[str, Any] = Body(...)):
             "images": len(images),
             "audio": len(audio_tracks)
         },
-        "replications": len(images)
+        "replications": len(replications)
     }
 
 @app.get("/api/data-inputs")
