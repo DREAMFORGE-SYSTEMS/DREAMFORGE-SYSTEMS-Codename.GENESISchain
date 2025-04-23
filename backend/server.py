@@ -96,41 +96,95 @@ async def get_last_block():
     )
     return last_block
 
-# Quantum-inspired AI Oracle for mining optimization
-class MiningOracle:
+# QNodeOS-inspired Quantum Network Processing Unit (QNPU) simulator
+class QNPUSimulator:
+    """Simulates the behavior of a Quantum Network Processing Unit as described in QNodeOS"""
+    
     def __init__(self):
-        """Initialize the mining oracle with a simple decision tree model"""
+        self.qubits_available = 4  # Simulated quantum memory
+        self.qubit_states = [None] * self.qubits_available
+        self.operations_log = []
+        self.operation_counter = 0
+        
+    def execute_quantum_operation(self, operation_type, params=None):
+        """Simulates execution of a quantum operation"""
+        self.operation_counter += 1
+        
+        operation_record = {
+            "id": self.operation_counter,
+            "type": operation_type,
+            "params": params,
+            "timestamp": time.time()
+        }
+        
+        self.operations_log.append(operation_record)
+        
+        # In a real quantum processor, this would perform the actual quantum operation
+        # Here we just log it for simulation purposes
+        return operation_record
+    
+    def get_operations_log(self, limit=10):
+        """Return recent operations for operational data collection"""
+        return self.operations_log[-limit:] if self.operations_log else []
+    
+    def clear_operations_log(self):
+        """Clear operations log"""
+        self.operations_log = []
+
+# Enhanced Quantum-inspired AI Oracle for mining optimization
+class MiningOracle:
+    def __init__(self, qnpu_simulator=None):
+        """Initialize the mining oracle with a QNodeOS-inspired architecture"""
         self.training_data = []
         self.model = self._create_default_model()
         self.metrics = {
             "total_attempts": 0,
             "oracle_approvals": 0,
             "successful_mines": 0,
-            "energy_saved": 0
+            "energy_saved": 0,
+            "quantum_operations": 0
         }
+        self.qnpu = qnpu_simulator if qnpu_simulator else QNPUSimulator()
+        self.operational_data_buffer = []
         
     def _create_default_model(self):
-        """Create a simple decision tree model for initial predictions"""
+        """Create a quantum-inspired decision tree model for initial predictions"""
         # In a real implementation, this would be a trained model
-        # For this simulation, we'll use a simple rule-based system
+        # For this simulation, we use a rule-based system inspired by QBT's Method C
         return {
             "min_one_bits": 8,      # Minimum number of 1 bits
             "max_one_bits": 24,     # Maximum number of 1 bits
             "min_consec_zeros": 3,  # Minimum consecutive zeros
             "min_consec_ones": 2,   # Minimum consecutive ones
-            "xor_threshold": 16     # XOR threshold with last proof
+            "xor_threshold": 16,    # XOR threshold with last proof
+            "hamming_weight_threshold": 12,  # New QNodeOS-inspired parameter
+            "quantum_pattern_match": 0.65    # New QNodeOS-inspired parameter
         }
     
     def extract_features(self, last_proof: int, proof: int):
-        """Extract predictive features from the proof parameters"""
+        """
+        Extract predictive features from the proof parameters using 
+        simulated quantum operations inspired by QNodeOS
+        """
+        # Simulate quantum feature extraction by logging quantum operations
+        self.qnpu.execute_quantum_operation(
+            "feature_extraction", 
+            {"last_proof": last_proof, "proof": proof}
+        )
+        
         binary = bin(proof)[2:].zfill(32)
         features = {
             "one_bits": binary.count('1'),
             "consec_zeros": self._max_consecutive_chars(binary, '0'),
             "consec_ones": self._max_consecutive_chars(binary, '1'),
             "xor_with_last": bin(last_proof ^ proof).count('1'),
-            "last_proof_relation": abs(last_proof - proof) % 256
+            "last_proof_relation": abs(last_proof - proof) % 256,
+            # New quantum-inspired features
+            "hamming_weight": self._calculate_hamming_weight(last_proof, proof),
+            "quantum_pattern": self._simulate_quantum_pattern_match(last_proof, proof)
         }
+        
+        self.metrics["quantum_operations"] += 1
         return features
     
     def _max_consecutive_chars(self, s: str, char: str) -> int:
@@ -147,20 +201,60 @@ class MiningOracle:
                 
         return max_count
     
+    def _calculate_hamming_weight(self, last_proof: int, proof: int) -> int:
+        """Calculate Hamming weight between two proofs (simulates quantum calculation)"""
+        # Simulate quantum operation
+        self.qnpu.execute_quantum_operation(
+            "hamming_calculation", 
+            {"last_proof": last_proof, "proof": proof}
+        )
+        
+        # Classical calculation to simulate the result
+        xor_result = last_proof ^ proof
+        return bin(xor_result).count('1')
+    
+    def _simulate_quantum_pattern_match(self, last_proof: int, proof: int) -> float:
+        """Simulate a quantum pattern matching algorithm"""
+        # Simulate quantum operation
+        self.qnpu.execute_quantum_operation(
+            "pattern_matching", 
+            {"last_proof": last_proof, "proof": proof}
+        )
+        
+        # Use hash of the inputs to generate a pseudo-random but deterministic result
+        combined = str(last_proof) + str(proof)
+        hash_val = int(hashlib.md5(combined.encode()).hexdigest(), 16)
+        return (hash_val % 1000) / 1000.0  # Range 0.0-1.0
+    
     def predict(self, last_proof: int, proof: int) -> bool:
-        """Predict if this mining attempt is likely to succeed"""
+        """
+        Predict if this mining attempt is likely to succeed using 
+        QNodeOS-inspired quantum simulation
+        """
+        # Simulate a quantum prediction operation
+        self.qnpu.execute_quantum_operation(
+            "oracle_prediction", 
+            {"last_proof": last_proof, "proof": proof}
+        )
+        
         # Extract features
         features = self.extract_features(last_proof, proof)
         
-        # Simple rule-based prediction (simulate decision tree)
+        # Enhanced rule-based prediction (inspired by QBT's Method C)
         model = self.model
         if (
             model["min_one_bits"] <= features["one_bits"] <= model["max_one_bits"] and
             features["consec_zeros"] >= model["min_consec_zeros"] and
             features["consec_ones"] >= model["min_consec_ones"] and
-            features["xor_with_last"] <= model["xor_threshold"]
+            features["xor_with_last"] <= model["xor_threshold"] and
+            # New quantum-inspired conditions
+            features["hamming_weight"] <= model["hamming_weight_threshold"] and
+            features["quantum_pattern"] >= model["quantum_pattern_match"]
         ):
             self.metrics["oracle_approvals"] += 1
+            
+            # Collect operational data for self-replication
+            self._collect_operational_data("oracle_approval", features)
             return True
         
         # Save energy by skipping unlikely candidates
@@ -172,6 +266,39 @@ class MiningOracle:
         self.metrics["total_attempts"] += 1
         if successful:
             self.metrics["successful_mines"] += 1
+            
+            # Collect operational data for successful mining
+            self._collect_operational_data("successful_mining", {"success": True})
+    
+    def _collect_operational_data(self, event_type, data):
+        """Collect operational data for self-replication"""
+        event = {
+            "type": event_type,
+            "timestamp": time.time(),
+            "data": data,
+            "quantum_operations": self.qnpu.get_operations_log(5)  # Get last 5 operations
+        }
+        
+        self.operational_data_buffer.append(event)
+        
+        # When buffer reaches threshold, process for self-replication
+        if len(self.operational_data_buffer) >= 5:  # Small threshold for simulation
+            self._process_operational_data()
+    
+    def _process_operational_data(self):
+        """Process collected operational data for self-replication"""
+        if not self.operational_data_buffer:
+            return
+            
+        # Convert operational data to a hash for content generation
+        data_string = json.dumps(self.operational_data_buffer, sort_keys=True)
+        operational_hash = hashlib.sha256(data_string.encode()).hexdigest()
+        
+        # Clear buffer after processing
+        self.operational_data_buffer = []
+        
+        # Return the hash for self-replication
+        return operational_hash
     
     def get_efficiency_stats(self):
         """Return efficiency statistics"""
@@ -190,8 +317,13 @@ class MiningOracle:
             "total_attempts": metrics["total_attempts"],
             "oracle_approvals": metrics["oracle_approvals"],
             "successful_mines": metrics["successful_mines"],
-            "energy_saved": metrics["energy_saved"]
+            "energy_saved": metrics["energy_saved"],
+            "quantum_operations": metrics["quantum_operations"]
         }
+        
+    def get_operational_hash(self):
+        """Get a hash from current operational data for immediate use"""
+        return self._process_operational_data()
 
 # Initialize the mining oracle
 mining_oracle = MiningOracle()
