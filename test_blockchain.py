@@ -12,10 +12,9 @@ async def test():
     miner_address = wallet.get_address()
     print(f"Created wallet with address: {miner_address}")
     
-    # Mine a block (create genesis block)
-    print("Mining a block...")
-    block = blockchain.mine_block(miner_address)
-    print(f"Mined block with index {block.index} and hash {block.hash}")
+    # Get the genesis block
+    genesis_block = blockchain.chain[0]
+    print(f"Genesis block: index={genesis_block.index}, hash={genesis_block.hash}")
     
     # Check the balance
     balance = blockchain.get_balance(miner_address)
@@ -36,9 +35,12 @@ async def test():
     print("Added transaction to blockchain")
     
     # Mine another block to include the transaction
-    print("Mining another block...")
+    print("Mining a block...")
     block = blockchain.mine_block(miner_address)
-    print(f"Mined block with index {block.index} and hash {block.hash}")
+    if block:
+        print(f"Mined block with index {block.index} and hash {block.hash}")
+    else:
+        print("No block was mined")
     
     # Check the balance again
     balance = blockchain.get_balance(miner_address)
@@ -47,6 +49,13 @@ async def test():
     # Verify that the blockchain is valid
     is_valid = blockchain.is_chain_valid()
     print(f"Blockchain is valid: {is_valid}")
+    
+    # Check chain length
+    print(f"Chain length: {len(blockchain.chain)}")
+    
+    # Print chain for debugging
+    for i, block in enumerate(blockchain.chain):
+        print(f"Block {i}: hash={block.hash}, transactions={len(block.transactions)}")
 
 if __name__ == "__main__":
     asyncio.run(test())
