@@ -91,7 +91,10 @@ async def main():
         # Mine a block to confirm transactions
         logger.info("Mining block to confirm transactions...")
         block = genesis_chain.mine_block("miner")
-        logger.info(f"Mined block {block.index} with {len(block.transactions)} transactions")
+        if block:
+            logger.info(f"Mined block {block.index} with {len(block.transactions)} transactions")
+        else:
+            logger.info("No block was mined (possibly no pending transactions)")
         
         # Check balances
         alice_balance = genesis_chain.blockchain.get_balance(alice_address)
